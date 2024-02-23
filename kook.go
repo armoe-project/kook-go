@@ -20,13 +20,13 @@ func (c *Client) Start() {
 
 	logrus.Info("正在获取网关地址...")
 	botApi := api.NewApi(c.token)
-	gateway, err := botApi.Gateway(false)
+	gateway, err := botApi.GatewayIndex(false)
 	if err != nil {
 		logrus.Error(err)
 		return
 	}
 
 	logrus.Info("正在连接到网关...")
-	client := websocket.NewClient(gateway.Data.Url)
+	client := websocket.NewClient(gateway.Data.Url, c.token)
 	client.Connect()
 }

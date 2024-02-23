@@ -48,6 +48,8 @@ func InitLogger() {
 
 func setLevel() {
 	level := os.Getenv("LOG_LEVEL")
+	level = strings.ToUpper(level)
+	level = strings.TrimSpace(level)
 	if level == "" {
 		level = "INFO"
 	}

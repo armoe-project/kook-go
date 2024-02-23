@@ -1,6 +1,9 @@
 package request
 
-import "github.com/go-resty/resty/v2"
+import (
+	"github.com/go-resty/resty/v2"
+	"github.com/sirupsen/logrus"
+)
 
 type Client struct {
 	token string
@@ -16,6 +19,8 @@ func (c *Client) Get(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	logrus.Debugf("GET %s", path)
+	logrus.Debugf("Response: %s", resp.String())
 	return resp.String(), nil
 }
 
@@ -25,6 +30,9 @@ func (c *Client) Post(path string, body interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	logrus.Debugf("POST %s", path)
+	logrus.Debugf("Body: %s", body)
+	logrus.Debugf("Response: %s", resp.String())
 	return resp.String(), nil
 }
 

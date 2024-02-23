@@ -3,23 +3,23 @@ package websocket
 import (
 	"encoding/json"
 	"github.com/lxzan/gws"
-	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 )
 
 type Client struct {
-	url string
+	token string
+	url   string
 }
 
-func NewClient(url string) *Client {
-	return &Client{url: url}
+func NewClient(url, token string) *Client {
+	return &Client{url: url, token: token}
 }
 
 func (c *Client) Connect() {
 	opt := &gws.ClientOption{
 		Addr: c.url,
 	}
-	client, _, err := gws.NewClient(&Handler{}, opt)
+	client, _, err := gws.NewClient(&Handler{token: c.token}, opt)
 	if err != nil {
 		logrus.Error(err)
 		return
@@ -27,23 +27,12 @@ func (c *Client) Connect() {
 	client.ReadLoop()
 }
 
-type Handler struct{}
+type Handler struct {
+	token string
+}
 
 func (h *Handler) OnOpen(socket *gws.Conn) {
 	logrus.Infof("已连接至 WebSocket 网关 %s", socket.RemoteAddr())
-
-	c := cron.New()
-	// 每 25 秒发送一次心跳
-	_, _ = c.AddFunc("@every 25s", func() {
-		payload := &Payload{S: 2, SN: sn}
-		message, _ := json.Marshal(payload)
-		logrus.Debugf("发送心跳: %s", message)
-		err := socket.WriteMessage(1, message)
-		if err != nil {
-			return
-		}
-	})
-	c.Start()
 }
 
 func (h *Handler) OnClose(socket *gws.Conn, err error) {
@@ -63,5 +52,5 @@ func (h *Handler) OnMessage(socket *gws.Conn, message *gws.Message) {
 		return
 	}
 
-	onPayload(&payload)
+	onPayload(&payload, h.token, socket)
 }
